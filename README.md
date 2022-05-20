@@ -55,5 +55,5 @@ To validate there is actually no issues, the project provides 2 [K6](https://k6.
 To run the scripts, you can find below an example:
 
 ```shell
-6 run --vus 50 --iterations 100 k6/headerBench.js
+k6 run --vus 50 --iterations 100 k6/headerBench.js
 ```
