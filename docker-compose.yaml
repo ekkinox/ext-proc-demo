@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  ext_proc_demo_mesh:
+    image: istio/proxyv2:1.13.3
+    container_name: ext_proc_demo_mesh
+    entrypoint: /usr/local/bin/envoy
+    command: [
+      "--config-path", "/etc/envoy/envoy.yaml",
+      "--log-level", "${ENVOY_LOG_LEVEL:-info}",
+      "--service-cluster", "envoy-front",
+      "--service-node", "envoy-front"
+    ]
+    ports:
+      - 10000:10000
+      - 15000:15000
+    networks:
+      - ext-proc-demo-network
+    volumes:
+      - ./mesh/envoy.yaml:/etc/envoy/envoy.yaml
+
+  ext_proc_demo_service:
+    container_name: ext_proc_demo_service
+    build:
+      context: ./service
+    environment:
+      CLUSTER_NAME: "service"
+    expose:
+      - 8000
+      - 8080
+    networks:
+      - ext-proc-demo-network
+
+  ext_proc_demo_ext_proc:
+    container_name: ext_proc_demo_ext_proc
+    build:
+      context: ./ext-proc
+    environment:
+      CLUSTER_NAME: "ext_proc"
+    expose:
+      - 50051
+    networks:
+      - ext-proc-demo-network
+
+networks:
+  ext-proc-demo-network:
+    driver: bridge
+
