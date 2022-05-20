@@ -24,11 +24,11 @@ The intent:
 
 The workflow:
 - a request comes arrives on envoy (http://localhost:10000)
-- envoy starts a gRPC connection, via the etc-proc filter, to our external processor (:50051)
-- envoy stream the request headers to the external processor
+- envoy starts a gRPC connection, via the ext-proc filter, to our external processor (:50051)
+- envoy streams the request headers to the external processor
 - if the request contains a `X-Csrf` header, it's stored in a variable and the request if propagated downstream to the service
 - if not, the external processor asks to be streamed with the request body, and the `csrf` post field is stored in a variable, and the request if propagated downstream to the service
-- the service gets the request a generates a response
+- the downstream service processes the request and generates a response
 - envoy stream the response to the external processor
 - the external processor add a new response header with the csrf variable content
 
