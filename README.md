@@ -46,7 +46,7 @@ Then you can interact with the service through envoy on [[POST] http://localhost
 
 ## Concurrency
 
-The main goal of this project is to ENSURE that this pattern does not come with concurrency issues, especially because of the use, external processor side, high scope variables across gRPC stream handling.
+The main goal of this project is to ENSURE that this pattern does not come with concurrency issues, especially because of the use, external processor side, of high scope variables across gRPC stream handling.
 
 To validate there is actually no issues, the project provides 2 [K6](https://k6.io/) benchmarking scripts:
 - [headerBench.js](k6/headerBench.js): to test under traffic the CSRF provided via header
