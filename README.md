@@ -20,7 +20,7 @@ This provides:
 The intent:
 - we want to extract a CSRF value and add it in a dedicated `X-Extracted-Csrf` response header
 - this CSRF can come directly form a `X-Csrf` header
-- or from a form post, in the `csrf field`
+- or from a form post, in the `csrf` field
 
 The workflow:
 - a request comes arrives on envoy (http://localhost:10000)
