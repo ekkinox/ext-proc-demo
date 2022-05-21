@@ -30,7 +30,7 @@ The workflow:
 - if not, the external processor asks to be streamed with the request body, and the `csrf` post field is stored in a variable, and the request if propagated downstream to the service
 - the downstream service processes the request and generates a response
 - envoy stream the response to the external processor
-- the external processor add a new response header with the csrf variable content
+- the external processor add a new `X-Extracted-Csrf` response header with the csrf variable content
 
 ## Usage
 
