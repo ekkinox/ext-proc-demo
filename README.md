@@ -13,7 +13,7 @@
 This project is testing in depth how you can work with Envoy ext-proc filter, especially when it comes to share data between processing steps.
 
 This provides:
-- a [simple golang service](service), just printing received headers and adding a received CSRF value as response header
+- a [simple golang service](service), just printing received request headers
 - a [Envoy proxy](mesh) exposing the service, and enabling an ext-proc filter
 - a [golang gRPC external processor](ext-proc) that will be used by Envoy to manipulate the in/outbound of the service
 
