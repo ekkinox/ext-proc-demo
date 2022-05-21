@@ -10,14 +10,14 @@
 
 ## Concept
 
-This project is testing in depth how you can work with Envoy ext-proc filter, especially when it comes to share data between processing steps.
+This project is testing in depth how you can work with [Envoy ext-proc filter](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/ext_proc/v3/ext_proc.proto), especially when it comes to share data between processing steps.
 
 This provides:
 - a [simple golang service](service), just printing received request headers
-- a [Envoy proxy](mesh) exposing the service, and enabling an ext-proc filter
+- a [Envoy proxy](envoy) exposing the service, and enabling an ext-proc filter
 - a [golang gRPC external processor](ext-proc) that will be used by Envoy via the ext-proc filter to manipulate the request to / response of the service to add logic 
 
-The intent:
+The intent (to test ext-proc capabilities):
 - we want to extract a CSRF value and add it in a dedicated `X-Extracted-Csrf` response header
 - this CSRF can come directly form a `X-Csrf` header
 - or from a form post, in the `csrf` field
@@ -48,7 +48,7 @@ Then you can interact with the service through envoy on [[POST] http://localhost
 
 The main goal of this project is to ensure that this pattern does not come with concurrency issues, especially because of the use, external processor side, of high scope variables across gRPC stream handling.
 
-To validate there is actually no concurrency issues, the project provides 2 [K6](https://k6.io/) benchmarking scripts (response code + body assertions) :
+To validate there is actually no concurrency issues, the project provides 2 [K6](https://k6.io/) benchmarking scripts (response code + header assertions) :
 - [headerBench.js](k6/headerBench.js): to test under traffic the CSRF provided via header
 - [bodyBench.js](k6/bodyBench.js): to test under traffic the CSRF provided via form post
 

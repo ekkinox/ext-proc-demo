@@ -1,9 +1,9 @@
 version: '3'
 
 services:
-  ext_proc_demo_mesh:
+  ext_proc_demo_envoy:
     image: istio/proxyv2:1.13.3
-    container_name: ext_proc_demo_mesh
+    container_name: ext_proc_demo_envoy
     entrypoint: /usr/local/bin/envoy
     command: [
       "--config-path", "/etc/envoy/envoy.yaml",
@@ -17,7 +17,7 @@ services:
     networks:
       - ext-proc-demo-network
     volumes:
-      - ./mesh/envoy.yaml:/etc/envoy/envoy.yaml
+      - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml
 
   ext_proc_demo_service:
     container_name: ext_proc_demo_service
