@@ -13,7 +13,7 @@
 This project is testing in depth how you can work with [Envoy ext-proc filter](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/ext_proc/v3/ext_proc.proto), especially when it comes to share data between processing steps.
 
 This provides:
-- a [simple golang service](service), just printing received request headers
+- a [simple golang service](service), just returning in JSON the received request headers
 - a [Envoy proxy](envoy) exposing the service, and enabling an ext-proc filter
 - a [golang gRPC external processor](ext-proc) that will be used by the ext-proc filter to manipulate the request & response of the service
 
