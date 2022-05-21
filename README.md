@@ -52,7 +52,7 @@ To validate there is actually no concurrency issues, the project provides 2 [K6]
 - [headerBench.js](k6/headerBench.js): to test under traffic the CSRF provided via header
 - [bodyBench.js](k6/bodyBench.js): to test under traffic the CSRF provided via form post
 
-To run the scripts, you can find below an example:
+To run the scripts, you can run for example:
 
 ```shell
 k6 run --vus 50 --iterations 100 k6/headerBench.js
