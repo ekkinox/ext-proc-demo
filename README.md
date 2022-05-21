@@ -41,7 +41,7 @@ docker-compose up -d
 
 Then you can interact with the service through envoy on [[POST] http://localhost:10000](http://localhost:10000)
 - by sending the `X-Csrf` header and check you get it back in the `X-Extracted-Csrf` response header
-- or by sending the `csrf` post field and check you get it back in the `X-Extracted-Csrf` response header
+- or by sending the `csrf` form post field and check you get it back in the `X-Extracted-Csrf` response header
 
 
 ## Concurrency
