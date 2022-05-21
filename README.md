@@ -15,7 +15,7 @@ This project is testing in depth how you can work with Envoy ext-proc filter, es
 This provides:
 - a [simple golang service](service), just printing received request headers
 - a [Envoy proxy](mesh) exposing the service, and enabling an ext-proc filter
-- a [golang gRPC external processor](ext-proc) that will be used by Envoy to manipulate the in/outbound of the service
+- a [golang gRPC external processor](ext-proc) that will be used by Envoy via the ext-proc filter to manipulate the request to / response of the service to add logic 
 
 The intent:
 - we want to extract a CSRF value and add it in a dedicated `X-Extracted-Csrf` response header
