@@ -17,7 +17,7 @@ This provides:
 - a [Envoy proxy](envoy) exposing the service, and enabling an ext-proc filter
 - a [golang gRPC external processor](ext-proc) that will be used by the ext-proc filter to manipulate the request & response of the service
 
-The intent (to test ext-proc capabilities):
+The intent (example to test ext-proc capabilities):
 - we want to extract a CSRF value and add it in a dedicated `X-Extracted-Csrf` response header
 - this CSRF can come directly form a `X-Csrf` header
 - or from a form post, in the `csrf` field
