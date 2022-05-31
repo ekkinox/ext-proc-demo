@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"context"
-	"flag"
 	"io"
 	"io/ioutil"
 	"log"
@@ -11,10 +10,12 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"strings"
 	"syscall"
 	"time"
 
+	"github.com/coocood/freecache"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -26,7 +27,8 @@ import (
 )
 
 var (
-	grpcport = flag.String("grpcport", ":50051", "grpcport")
+	cache    *freecache.Cache
+	cacheKey = []byte("key")
 )
 
 type server struct{}
@@ -49,8 +51,8 @@ func (s *server) Process(srv extProcPb.ExternalProcessor_ProcessServer) error {
 
 	ctx := srv.Context()
 
-	csrf := ""
 	contentType := ""
+	csrf := ""
 
 	for {
 
@@ -89,11 +91,17 @@ func (s *server) Process(srv extProcPb.ExternalProcessor_ProcessServer) error {
 			log.Printf("EndOfStream: %v\n", h.RequestHeaders.EndOfStream)
 
 			for _, n := range h.RequestHeaders.Headers.Headers {
+				if strings.ToLower(n.Key) == "content-type" {
+					contentType = n.Value
+				}
 				if strings.ToLower(n.Key) == "x-csrf" {
 					csrf = n.Value
 				}
-				if strings.ToLower(n.Key) == "content-type" {
-					contentType = n.Value
+				if strings.ToLower(n.Key) == "x-cache" {
+					_, err := cache.Get(cacheKey)
+					if err != nil {
+						cache.Set(cacheKey, []byte(n.Value), 1)
+					}
 				}
 			}
 
@@ -183,9 +191,12 @@ func (s *server) Process(srv extProcPb.ExternalProcessor_ProcessServer) error {
 			r := req.Request
 			h := r.(*extProcPb.ProcessingRequest_ResponseHeaders)
 
+			cacheEntry, _ := cache.Get(cacheKey)
+
 			log.Printf("Request: %+v\n", r)
 			log.Printf("Headers: %+v\n", h)
 			log.Printf("Content Type: %v\n", contentType)
+			log.Printf("Cache entry: %v\n", cacheEntry)
 
 			resp = &extProcPb.ProcessingResponse{
 				Response: &extProcPb.ProcessingResponse_ResponseHeaders{
@@ -203,6 +214,12 @@ func (s *server) Process(srv extProcPb.ExternalProcessor_ProcessServer) error {
 										Header: &configPb.HeaderValue{
 											Key:   "x-extracted-csrf",
 											Value: csrf,
+										},
+									},
+									{
+										Header: &configPb.HeaderValue{
+											Key:   "x-extracted-cache",
+											Value: string(cacheEntry),
 										},
 									},
 								},
@@ -226,9 +243,12 @@ func (s *server) Process(srv extProcPb.ExternalProcessor_ProcessServer) error {
 
 func main() {
 
-	flag.Parse()
+	// cache init
+	cache = freecache.NewCache(1024)
+	debug.SetGCPercent(20)
 
-	lis, err := net.Listen("tcp", *grpcport)
+	// grpc server init
+	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -238,8 +258,9 @@ func main() {
 	extProcPb.RegisterExternalProcessorServer(s, &server{})
 	healthPb.RegisterHealthServer(s, &healthServer{})
 
-	log.Printf("Starting gRPC server on port %s\n", *grpcport)
+	log.Println("Starting gRPC server on port :50051")
 
+	// shutdown
 	var gracefulStop = make(chan os.Signal)
 	signal.Notify(gracefulStop, syscall.SIGTERM)
 	signal.Notify(gracefulStop, syscall.SIGINT)

@@ -3,11 +3,13 @@ module github.com/ekkinox/ext-proc-demo/ext-proc
 go 1.17
 
 require (
+	github.com/coocood/freecache v1.2.1
 	github.com/envoyproxy/go-control-plane v0.10.1
 	google.golang.org/grpc v1.41.0-dev
 )
 
 require (
+	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cncf/xds/go v0.0.0-20211130200136-a8f946100490 // indirect
 	github.com/envoyproxy/protoc-gen-validate v0.6.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
