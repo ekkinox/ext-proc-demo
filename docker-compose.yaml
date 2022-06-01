@@ -37,6 +37,8 @@ services:
       context: ./ext-proc
     environment:
       CLUSTER_NAME: "ext_proc"
+      DEBUG: true
+      PORT: 50051
     expose:
       - 50051
     networks:
