@@ -10,7 +10,7 @@ RUN go mod download
 RUN go build -o /ext-proc
 
 ## Multistage deploy
-FROM gcr.io/distroless/base-debian10
+FROM golang:1.17-alpine
 
 WORKDIR /
 COPY --from=build /ext-proc /ext-proc
