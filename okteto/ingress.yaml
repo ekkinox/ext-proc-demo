@@ -1,0 +1,121 @@
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: ext-proc-demo-service
+spec:
+  host: ext-proc-demo-service.istio.svc.cluster.local
+  trafficPolicy:
+    outlierDetection:
+      baseEjectionTime: 10s
+      consecutive5xxErrors: 1
+      consecutiveGatewayErrors: 1
+      maxEjectionPercent: 33
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: ext-proc-demo-service
+spec:
+  gateways:
+  - default
+  - mesh
+  hosts:
+  - ext-proc-demo-service.sandbox-poc.ankorstore.com
+  http:
+  - route:
+    - destination:
+        host: ext-proc-demo-service.istio.svc.cluster.local
+        port:
+          number: 8080
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: ext-proc-demo-ext-proc
+spec:
+  gateways:
+  - default
+  - mesh
+  hosts:
+  - ext-proc-demo-ext-proc.sandbox-poc.ankorstore.com
+  http:
+  - route:
+    - destination:
+        host: ext-proc-demo-ext-proc.istio.svc.cluster.local
+        port:
+          number: 50051
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: default
+spec:
+  selector:
+    istio: ingressgateway # use Istio default gateway implementation
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "ext-proc-demo-service.sandbox-poc.ankorstore.com"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: dummy
+spec:
+  workloadSelector:
+    labels:
+      stack.okteto.com/service: ext-proc-demo-service
+      #istio: ingressgateway
+      #test: test
+  configPatches:
+    - applyTo: HTTP_FILTER
+      match:
+        context: SIDECAR_INBOUND
+        listener:
+          portNumber: 8080
+          filterChain:
+            filter:
+              name: "envoy.filters.network.http_connection_manager"
+              subFilter:
+                name: "envoy.filters.http.router"
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.ext_proc
+          typed_config:
+            "@type": "type.googleapis.com/envoy.extensions.filters.http.ext_proc.v3.ExternalProcessor"
+            failure_mode_allow: true
+            async_mode: false
+            processing_mode:
+              request_header_mode: "SEND"
+              response_header_mode: "SKIP"
+              request_body_mode: "NONE"
+              response_body_mode: "NONE"
+              request_trailer_mode: "SKIP"
+              response_trailer_mode: "SKIP"
+            grpc_service:
+              envoy_grpc:
+                cluster_name: "ext-proc"
+    - applyTo: CLUSTER
+      match:
+        context: SIDECAR_INBOUND
+      patch:
+        operation: ADD
+        value:
+          name: ext-proc
+          type: STRICT_DNS
+          connect_timeout: 0.5s
+          lb_policy: ROUND_ROBIN
+          http2_protocol_options: {}
+          load_assignment:
+            cluster_name: ext-proc
+            endpoints:
+              - lb_endpoints:
+                  - endpoint:
+                      address:
+                        socket_address:
+                          address: ext-proc-demo-ext-proc
+                          port_value: 50051

@@ -1,0 +1,12 @@
+deploy:
+  compose:
+    - docker-compose-okteto.yaml
+  commands:
+    - kubectl apply -f okteto/ingress.yaml -n ${OKTETO_NAMESPACE}
+    - kubectl patch svc/ext-proc-demo-service -n ${OKTETO_NAMESPACE} -p '{"spec":{"$setElementOrder/ports":[{"port":8000},{"port":8080},{"port":10000}],"ports":[{"appProtocol":"http","port":8080}]}}'
+dev:
+  ext-proc-demo-service:
+    container: ext-proc-demo-service
+    
+  ext-proc-demo-ext-proc:
+    container: ext-proc-demo-ext-proc

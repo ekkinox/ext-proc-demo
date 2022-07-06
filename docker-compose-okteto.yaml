@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  ext-proc-demo-service:
+    labels:
+      dev.okteto.com/private: "true"
+      sidecar.istio.io/inject: "true"
+    container_name: ext-proc-demo-service
+    build:
+      context: ./service
+    environment:
+      CLUSTER_NAME: "service"
+    ports:
+      - 8000:8000
+      - 8080:8080
+
+  ext-proc-demo-ext-proc:
+    labels:
+      dev.okteto.com/private: "true"
+      sidecar.istio.io/inject: "true"
+    container_name: ext-proc-demo-ext-proc
+    build:
+      context: ./ext-proc
+    environment:
+      CLUSTER_NAME: "ext_proc"
+    ports:
+      - "50051:50051"
+
+endpoints:
+  - path: /
+    service: ext-proc-demon-service
+    port: 8080
+  
