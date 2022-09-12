@@ -27,7 +27,7 @@ static_resources:
               domains: [ "*" ]
               routes:
               - match:
-                  prefix: "/"
+                  prefix: "/unprotected"
                 route:
                   cluster: service
                   timeout: 30s
@@ -35,6 +35,16 @@ static_resources:
                   envoy.filters.http.ext_proc:
                     "@type": type.googleapis.com/envoy.extensions.filters.http.ext_proc.v3.ExtProcPerRoute
                     disabled: true
+              - match:
+                  prefix: "/"
+                route:
+                  cluster: service
+                  timeout: 30s
+                # omitting renders the following defaults
+                # typed_per_filter_config:
+                #   envoy.filters.http.ext_proc:
+                #     "@type": type.googleapis.com/envoy.extensions.filters.http.ext_proc.v3.ExtProcPerRoute
+                #     disabled: false
           http_filters:
           - name: envoy.filters.http.ext_proc
             typed_config:

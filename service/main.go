@@ -26,5 +26,15 @@ func main() {
 		return c.JSON(h)
 	})
 
+	app.Get("/unprotected", func(c *fiber.Ctx) error {
+
+		h := map[string]interface{}{}
+		c.Request().Header.VisitAll(func(key, value []byte) {
+			h[string(key)] = string(value)
+		})
+
+		return c.JSON(h)
+	})
+
 	log.Fatal(app.Listen(":8080"))
 }
